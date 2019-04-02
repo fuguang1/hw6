@@ -1,0 +1,24 @@
+clear all;
+clc;
+I = imread('lena.bmp');
+figure(1);
+subplot(1,3,1);imshow(I);title('origin');
+mo = fspecial('motion',50,135);
+I_mo = imfilter(I,mo);
+subplot(1,3,2);imshow(I_mo);title('motion');
+I_noise = imnoise(I_mo,'gaussian',0,0.01);
+subplot(1,3,3);imshow(I_noise);title('motion-noise');
+figure(2);
+for k = 0.01:0.01:0.1
+    wiener = deconvwnr(I_noise,mo,k);
+    subplot(2,5,k*100);imshow(wiener);title('restore');
+    SNR_viener(uint8(k*100)) = sum(sum(wiener.^2))/sum(sum((wiener-I).^2));
+end
+figure(3);
+for k = 1:10
+    lsm = deconvreg(I_noise,mo,(k*0.0005+0.0075)*512*512);
+    subplot(2,5,k);imshow(lsm);title('lsm');
+    SNR_lsm(k) = sum(sum(lsm.^2))/sum(sum((wiener-I).^2));
+end
+SNR_viener
+SNR_lsm

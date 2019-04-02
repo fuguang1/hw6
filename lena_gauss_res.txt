@@ -1,0 +1,65 @@
+clear all;
+clc;
+I = imread('lena.bmp');
+figure(1);
+subplot(2,3,1);imshow(I);title('origin');
+I_noise = imnoise(I,'gaussian',0,0.1);
+subplot(2,3,2);imshow(I_noise);title('noise');
+I_noise = double(I_noise);
+I_noise = padarray(I_noise,[1,1]);
+algo = 0;
+geo = 1;
+harm = 0;
+op_harm1 = 0;
+op_harm2 = 0;
+for i = 1:512
+    for j = 1:512
+        for l1 = 0:2
+            for l2 = 0:2
+                algo = algo+I_noise(i+l1,j+l2);
+                geo = geo*I_noise(i+l1,j+l2);
+                harm = harm+1/I_noise(i+l1,j+l2);
+                op_harm1 = op_harm1+I_noise(i+l1,j+l2)^(-0.5);
+                op_harm2 = op_harm2+I_noise(i+l1,j+l2)^(-1.5);
+            end
+        end
+        model(1:3,1:3) = I_noise(i:i+2,j:j+2);
+        model2 = reshape(model,1,9);
+        model2 = sort(model2);
+        I_algo(i,j) = algo/9;
+        I_geo(i,j) = geo^(1/9);
+        I_harm(i,j) = 9/harm;
+        I_op(i,j) = op_harm1/op_harm2;
+        I_med(i,j) = median(median(model));
+        I_min(i,j) = min(min(model));
+        I_mp(i,j) = (max(max(model))+min(min(model)))/2;
+        I_alp(i,j) = (model2(4)+model2(5)+model2(6))/3;
+        algo = 0;
+        geo = 1;
+        harm = 0;
+        op_harm1 = 0;
+        op_harm2 = 0;
+    end
+end
+I_algo = uint8(I_algo);
+subplot(2,3,3);imshow(I_algo);title('algorithmic');
+I_geo = uint8(I_geo);
+subplot(2,3,4);imshow(I_geo);title('geometry');
+I_harm = uint8(I_harm);
+subplot(2,3,5);imshow(I_harm);title('harmonic');
+I_op = uint8(I_op);
+subplot(2,3,6);imshow(I_op);title('Q=-1.5');
+figure(2);
+subplot(2,3,1);imshow(I);title('origin');
+subplot(2,3,2);imshow(uint8(I_noise));title('noise');
+I_med = uint8(I_med);
+subplot(2,3,3);imshow(I_med);title('median');
+I_min = uint8(I_min);
+subplot(2,3,4);imshow(I_min);title('minimum');
+I_mp = uint8(I_mp);
+subplot(2,3,5);imshow(I_mp);title('mid-point');
+I_alp = uint8(I_alp);
+subplot(2,3,6);imshow(I_alp);title('mend-alpha');
+
+
+
